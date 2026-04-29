@@ -11,7 +11,7 @@ st.sidebar.info("Developed by: Dr. Md Aquib")
 # AI Setup
 api_key = "AIzaSyC2Myp0FM1GcK7o8hLRfIcJusUT8S96nV4"
 genai.configure(api_key=api_key)
-model = genai.GenerativeModel('gemini-pro')
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
