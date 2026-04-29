@@ -3,48 +3,41 @@ import google.generativeai as genai
 from streamlit_mic_recorder import mic_recorder
 import os
 
-# Page config
-st.set_page_config(page_title="Dr. Aquib AI", page_icon="🤖", layout="wide")
+# Page setup
+st.set_page_config(page_title="Dr. Aquib JAT AI", page_icon="🤖")
 
-# Title
 st.title("🤖 Dr. Aquib JAT AI")
-st.caption("Smart AI Assistant | Voice + Chat")
+st.caption("Hindi + English AI Assistant")
 
 # Sidebar
-st.sidebar.title("⚙️ Settings")
-st.sidebar.info("Developed by Md Aquib")
+st.sidebar.info("Developed by: Dr. Md Aquib")
 
-# Secure API Key
+# ✅ Secure API key
 api_key = os.getenv("GOOGLE_API_KEY")
-
-if not api_key:
-    st.error("❌ API Key not found. Please add in Streamlit Secrets.")
-    st.stop()
-
 genai.configure(api_key=api_key)
 
-# Model (latest working)
-model = genai.GenerativeModel("gemini-1.5-flash-latest")
+# ✅ Latest working model
+model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
-# Chat memory
+# Chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Show chat history
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
+# Show previous messages
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-# Voice input
-st.subheader("🎤 Voice Command")
+# 🎤 Voice input
+st.write("🎤 Bol kar ya type karke puchiye:")
+
 audio = mic_recorder(
-    start_prompt="▶️ Start Recording",
-    stop_prompt="⏹️ Stop",
+    start_prompt="🎙️ Start Recording",
+    stop_prompt="⏹️ Stop Recording",
     key="recorder"
 )
 
-# Text input
-user_input = st.chat_input("Type your message...")
+user_input = st.chat_input("Type your question...")
 
 # Decide input
 prompt = None
@@ -53,7 +46,7 @@ if audio and audio.get("text"):
 elif user_input:
     prompt = user_input
 
-# Process input
+# If user asks something
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
 
@@ -61,15 +54,15 @@ if prompt:
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("Thinking... 🤔"):
-            try:
+        try:
+            with st.spinner("🤔 Soch raha hoon..."):
+                
+                # ✅ Hindi + English mix instruction
                 full_prompt = f"""
-You are Dr. Aquib JAT AI.
-Answer in simple English + Hindi mix.
-Keep answer short and clear.
-
-User: {prompt}
-"""
+                Tum ek helpful AI ho. Hindi aur simple English mix me answer do.
+                Easy language use karo.
+                Question: {prompt}
+                """
 
                 response = model.generate_content(full_prompt)
 
@@ -82,5 +75,6 @@ User: {prompt}
                     "content": reply
                 })
 
-            except Exception as e:
-                st.error(f"❌ Error: {e}")
+        except Exception as e:
+            st.error("⚠️ Kuch error aa gaya. Check API key ya model.")
+            st.write(e)
