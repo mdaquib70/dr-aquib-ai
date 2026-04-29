@@ -3,42 +3,57 @@ import google.generativeai as genai
 from streamlit_mic_recorder import mic_recorder
 import os
 
-st.set_page_config(page_title="Dr. Aquib JAT AI", page_icon="🤖")
+# Page config
+st.set_page_config(page_title="Dr. Aquib AI", page_icon="🤖", layout="wide")
 
+# Title
 st.title("🤖 Dr. Aquib JAT AI")
-st.sidebar.info("Developed by: Dr. Md Aquib")
+st.caption("Smart AI Assistant | Voice + Chat")
 
-# ✅ Secure API Key (IMPORTANT)
+# Sidebar
+st.sidebar.title("⚙️ Settings")
+st.sidebar.info("Developed by Md Aquib")
+
+# Secure API Key
 api_key = os.getenv("GOOGLE_API_KEY")
+
+if not api_key:
+    st.error("❌ API Key not found. Please add in Streamlit Secrets.")
+    st.stop()
+
 genai.configure(api_key=api_key)
 
-# ✅ Updated working model
-model = genai.GenerativeModel('gemini-1.5-flash-latest')
+# Model (latest working)
+model = genai.GenerativeModel("gemini-1.5-flash-latest")
 
-# Chat history
+# Chat memory
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+# Show chat history
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
 
-st.write("🎤 Bol kar command dein:")
-
+# Voice input
+st.subheader("🎤 Voice Command")
 audio = mic_recorder(
-    start_prompt="Recording shuru karein",
-    stop_prompt="Stop karein",
-    key='recorder'
+    start_prompt="▶️ Start Recording",
+    stop_prompt="⏹️ Stop",
+    key="recorder"
 )
 
-user_input = st.chat_input("Ya phir yahan type karein...")
+# Text input
+user_input = st.chat_input("Type your message...")
 
+# Decide input
 prompt = None
-if audio and audio.get('text'):
-    prompt = audio['text']
+if audio and audio.get("text"):
+    prompt = audio["text"]
 elif user_input:
     prompt = user_input
 
+# Process input
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
 
@@ -46,14 +61,26 @@ if prompt:
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        try:
-            full_prompt = f"You are Dr. Aquib JAT AI. Answer clearly: {prompt}"
-            response = model.generate_content(full_prompt)
+        with st.spinner("Thinking... 🤔"):
+            try:
+                full_prompt = f"""
+You are Dr. Aquib JAT AI.
+Answer in simple English + Hindi mix.
+Keep answer short and clear.
 
-            reply = response.text if hasattr(response, "text") else "No response"
-            st.markdown(reply)
+User: {prompt}
+"""
 
-            st.session_state.messages.append({"role": "assistant", "content": reply})
+                response = model.generate_content(full_prompt)
 
-        except Exception as e:
-            st.error(f"Error: {e}")
+                reply = response.text if hasattr(response, "text") else "No response"
+
+                st.markdown(reply)
+
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": reply
+                })
+
+            except Exception as e:
+                st.error(f"❌ Error: {e}")
