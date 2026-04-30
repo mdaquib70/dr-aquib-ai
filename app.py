@@ -13,7 +13,7 @@ st.caption("Hindi + English AI Assistant")
 st.sidebar.info("Developed by: Dr. Md Aquib")
 
 # API setup
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY")
+genai.configure(api_key=os.getenv("GEMINI_API_KEY")
 
 # ✅ Correct model (AI Studio compatible)
 model = genai.GenerativeModel("gemini-1.5-flash")
